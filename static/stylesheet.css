@@ -1,0 +1,209 @@
+/* Page layout */
+body {
+    margin: 0;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.page header {
+    display: flex;
+    height: 100px;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    gap: 2rem;
+}
+
+.page section {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    flex-grow: 1;
+}
+
+.page section nav {
+    flex-shrink: 0;
+    padding: 1em;
+    display: flex;
+}
+
+.page section main {
+    display: flex;
+    padding: 1em;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.page section aside {
+    display: flex;
+    flex-shrink: 0;
+    padding: 1em;
+    width: 200px;
+    box-sizing: border-box; /* šířka bude 200px včetně paddingu a rámečků (bez tohohle bude 200px + 1em) */
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Mobile layout */
+@media (max-width: 700px) {
+    .page section {
+        flex-direction: row-reverse;
+    }
+
+    .page section aside {
+        display: none;
+    }
+
+    .page section nav {
+        display: flex;
+        order: 1;
+    }
+}
+
+/* Logo */
+#logo {
+    padding: 1em;
+    display: flex;
+    align-items: center;
+}
+
+#logo-img {
+    width: 50px;
+}
+
+#logo-title {
+    margin-left: 0.5rem; 
+    font-weight: bold;
+    font-size: 25px;
+}
+
+/* Profile */
+#profile {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 1rem;
+}
+
+#profile img {
+    width: 40px;
+    height: 40px;
+}
+
+/* Menu */
+#menu ul {
+    margin: 0;
+    padding: 0;
+}
+#menu li {
+    display: inline-block;
+    list-style-type: none;
+    background-color: #111;
+}
+#menu a {
+    display: inline-block;
+    padding: 5px 20px;
+    text-decoration: none;
+    color: #fefefe;
+}
+
+#menu-control {
+    color: white;
+    padding: 5px 20px;
+    cursor: pointer;
+    background-color: #111111;
+    display: none;
+}
+
+#menu-control-input {
+    display: none;
+}
+
+#menu-control-input:checked + #menu {
+    display: block;
+}
+
+
+@media all and (max-width: 700px) {
+    #menu-control {
+        display: inline-block;
+    }
+
+    #menu li {
+        display: block;
+    }
+
+    #menu {
+        display: none;
+    }
+}
+
+/* Game */
+section main .main-container {
+    display: flex;
+    flex-grow: 1;
+    background-color: grey;
+    justify-content: center;
+    align-items: center;
+}
+
+#find-match {
+    width: 100px;
+    height: 100px;
+}
+
+/* In Game */
+#in-game {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 0.5em;
+}
+
+#player-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#opponent-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.player-cell {
+  width: 24px;
+  height: 24px;
+}
+
+.opponent-cell {
+  width: 24px;
+  height: 24px;
+}
+
+#player-board {
+  display: grid;
+  grid-auto-columns: 24px;
+  grid-auto-rows: 24px;
+}
+
+#opponents-board {
+  display: grid;
+  grid-auto-columns: 24px;
+  grid-auto-rows: 24px;
+}
+
+#board-separator {
+    display: block;
+    width: 2px;
+    height: 100%;
+}
