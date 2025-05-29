@@ -14,7 +14,7 @@ let createGameHTML = `
 
 let inQueueHTML = `
     <div id="in-queue" class="main-container" style="background-color: lightsteelblue">
-        <button id="find-match">Waiting for opponents..</button>
+        <button id="in-queue">Waiting for opponents..</button>
     </div>
 `;
 
@@ -45,15 +45,18 @@ class main {
             this.mainElem.innerHTML = createGameHTML;
 
             const findMatchBtn = document.getElementById('find-match');
-            if (findMatchBtn) {
-                findMatchBtn.addEventListener('click', () => {
-                    this.render(CONTENT.IN_QUEUE);
-                });
-            }
+            findMatchBtn.addEventListener('click', () => {
+                this.render(CONTENT.IN_QUEUE);
+            });
 
         } else if (content_type == CONTENT.IN_QUEUE) {
             this.mainElem.innerHTML = inQueueHTML;
             this.initiateSocket();
+
+            const inQueueButton = document.getElementById('in-queue');
+            inQueueButton.addEventListener('click', () => {
+                this.render(CONTENT.CREATE_GAME);
+            });
         } else if (content_type == CONTENT.IN_GAME) {
             this.mainElem.innerHTML = inGameHTML;
         } else {
@@ -91,3 +94,11 @@ class main {
 
 let content = new main();
 content.render(CONTENT.CREATE_GAME);
+
+const hamburgerBtn = document.getElementById('hamburger-menu');
+const aside = document.querySelector('.page section aside');
+
+hamburgerBtn.addEventListener('click', () => {
+    const isHidden = getComputedStyle(aside).display === 'none';
+    aside.style.display = isHidden ? 'flex' : 'none';
+});

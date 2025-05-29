@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="./stylesheet.css">
     <title>Minesweeper Arena</title>
 
@@ -10,31 +11,62 @@
 <body>
     <div class="page">
         <header style="background-color: lightblue">
-            <div id="logo">
-                <img id="logo-img" src="images/logo.webp" alt="MineArena logo">
-                <span id="logo-title">MineArena</span>
-            </div>
+            <a id="logo-link" href="/">
+                <div id="logo">
+                    <svg id="logo-img" viewBox="0 0 100 100">
+                        <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="#ddd" stroke="#888" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="18" fill="black" />
 
-            <nav id="menu">
+                        <line x1="50" y1="20" x2="50" y2="35" stroke="black" stroke-width="2"/>
+                        <line x1="50" y1="65" x2="50" y2="80" stroke="black" stroke-width="2"/>
+                        <line x1="20" y1="50" x2="35" y2="50" stroke="black" stroke-width="2"/>
+                        <line x1="65" y1="50" x2="80" y2="50" stroke="black" stroke-width="2"/>
+                        <line x1="30" y1="30" x2="40" y2="40" stroke="black" stroke-width="2"/>
+                        <line x1="60" y1="60" x2="70" y2="70" stroke="black" stroke-width="2"/>
+                        <line x1="30" y1="70" x2="40" y2="60" stroke="black" stroke-width="2"/>
+                        <line x1="60" y1="40" x2="70" y2="30" stroke="black" stroke-width="2"/>
+
+                        <circle cx="45" cy="45" r="4" fill="red" />
+                    </svg>
+
+                    <span id="logo-title">Minesweeper Arena</span>
+                </div>
+            </a>
+
+            <nav id="menu" style="background-color: rgb(65, 154, 189)">
                 <ul>
-                    <li><a href="#">Play</a></li>
-                    <li><a href="#">Ladder</a></li>
-                    <li><a href="#">About</a></li>
+                    <a href="#"><li>Play</li></a>
+                    <a href="#"><li>Ladder</li></a>
+                    <a href="#"><li>About</li></a>
                 </ul>
             </nav>
-
-            <div id="profile">
-                <img src="images/avatar.png" alt="Profile" />
-                <span>User</span>
+            
+            <div id="hamburger-menu">
+                <span>☰</span>
             </div>
+
+            <a id="profile-link" href="/">
+                <div id="profile">
+                    <span>Register</span>
+                </div>
+            </a>
         </header>
         
         <section>
             <main style="background-color: lightgreen">
-                
+                <!-- Content handled by JS -->
             </main>
 
             <aside id="side-content" style="background-color: lightseagreen">
+                <section id="hamburger-menu-aside" style="background-color: lightgoldenrodyellow">
+                    <ul>
+                        <a href="#"><li>Register</li></a>
+                        <a href="#"><li>Play</li></a>
+                        <a href="#"><li>Ladder</li></a>
+                        <a href="#"><li>About</li></a>
+                    </ul>
+                </section>
+
                 <section id="highest-rated" style="background-color: lightcyan">
                     <ul>
                         <li>Player 1 Elo 5000</li>
