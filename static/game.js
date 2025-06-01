@@ -39,6 +39,9 @@ export class Game {
             console.log("Received from server: ", data);
             this.processEvent(data);
         };
+
+        this.gameWinSound = new Audio('/sounds/game-win.mp3');
+        this.gameLoseSound = new Audio('/sounds/game-lose.mp3');
     }
 
     renderMinesweeperBoard(board, interactable) {
@@ -93,8 +96,10 @@ export class Game {
         }
 
         if (data.win) {
+            this.gameWinSound.play();
             alert("You won!");
         } else if (data.lose) {
+            this.gameLoseSound.play();
             alert("You lost!");
         }
 

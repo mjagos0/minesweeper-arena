@@ -143,22 +143,27 @@ func (mg *MultiplayerGame) listen(playerIndex int) {
 			}
 		}
 
-		respPlayer := MoveResponse{
-			CellUpdates: cellUpdates,
-			YourMove:    true,
-			Win:         playerIndex == mg.winner,
-			Lose:        1-playerIndex == mg.winner,
-		}
 		respOpponent := MoveResponse{
 			CellUpdates: maskedCellUpdates,
 			YourMove:    false,
 			Win:         1-playerIndex == mg.winner,
 			Lose:        playerIndex == mg.winner,
 		}
+		opponentResp, _ := json.Marshal(respOpponent)
+		mg.players[1-playerIndex].send <- opponentResp
+
+		if mg.games[playerIndex].finished || mg.winner != NoPlayer {
+			mg.games[playerIndex].revealBoard(&cellUpdates)
+		}
+
+		respPlayer := MoveResponse{
+			CellUpdates: cellUpdates,
+			YourMove:    true,
+			Win:         playerIndex == mg.winner,
+			Lose:        1-playerIndex == mg.winner,
+		}
 
 		playerResp, _ := json.Marshal(respPlayer)
-		opponentResp, _ := json.Marshal(respOpponent)
 		mg.players[playerIndex].send <- playerResp
-		mg.players[1-playerIndex].send <- opponentResp
 	}
 }

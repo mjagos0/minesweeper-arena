@@ -47,7 +47,10 @@ body {
     width: 200px;
     box-sizing: border-box;
     flex-direction: column;
-    justify-content: center;
+}
+
+#highest-rated {
+    align-self: flex-start;
 }
 
 /* Mobile layout */
@@ -60,14 +63,6 @@ body {
         display: flex;
         order: 1;
     }
-
-    /* #highest-rated {
-        display: none;
-    }
-
-    #recent-matches {
-        display: none;
-    } */
 }
 
 /* Logo */
@@ -194,6 +189,8 @@ body {
 
     #hamburger-menu-aside {
         display: flex;
+        align-self: flex-start;
+        flex-grow: 0;
     }
 
     #hamburger-menu-aside ul {
@@ -412,4 +409,14 @@ section main .main-container {
 
 #about p {
     margin: 0.2em 0;
+}
+
+@media all and (max-width: 800px) {
+    section main .main-container {
+        flex-direction: column;
+    }
+
+    #board-separator {
+        display: none;
+    }
 }

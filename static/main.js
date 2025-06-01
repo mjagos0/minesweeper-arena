@@ -48,8 +48,9 @@ let aboutHTML = `
     <div id="about" class="main-container" style="background-color: lightyellow">
         <p>Created for Czech Technical University,</p>
         <p>Faculty of Electrical Engineering,</p>
-        <p>Vývoj klientských aplikací v Javascriptu (B0B39KAJ) 2025,</p>
-        <p>Marek Jagoš</p>
+        <p>Vývoj klientských aplikací v Javascriptu</p>
+        <p>(B0B39KAJ)</p>
+        <p>2025, Marek Jagoš</p>
     </div>
 `
 
@@ -63,6 +64,7 @@ class main {
     constructor() {
         this.mainElem = document.querySelector('main');
         this.queueTimeout = null;
+        this.gameStartSound = new Audio('/sounds/game-start.mp3');
     }
 
     render(content_type) {
@@ -158,6 +160,7 @@ class main {
         const [p1RevealedDiv, p2RevealedDiv] = document.querySelectorAll('#score-board .score');
 
         this.game = new Game(socket, data.width, data.height, data.startX, data.startY, playerBoard, opponentBoard, p1RevealedDiv, p2RevealedDiv);
+        this.gameStartSound.play();
     }
 }
 

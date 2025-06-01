@@ -60,6 +60,18 @@ func (g *Game) processFlag(x, y int, cellUpdates *[]CellUpdate) {
 	}
 }
 
+func (g *Game) revealBoard(cellUpdates *[]CellUpdate) {
+	for y := 0; y < g.board.Height; y++ {
+		for x := 0; x < g.board.Width; x++ {
+			if !g.IsRevealed(x, y) {
+				g.UpdateState(x, y, REVEALED)
+				val := g.board.At(x, y)
+				*cellUpdates = append(*cellUpdates, CellUpdate{X: x, Y: y, Value: val})
+			}
+		}
+	}
+}
+
 func (g *Game) processReveal(x, y int, cellUpdates *[]CellUpdate) {
 	queue := [][2]int{{x, y}}
 	visited := make(map[[2]int]bool)
