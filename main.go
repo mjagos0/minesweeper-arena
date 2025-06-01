@@ -21,8 +21,8 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/ws", handleWebSocket)
 
-	log.Println("Server listening on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Server listening on 80")
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {

@@ -85,10 +85,6 @@ body {
     padding: 0px 20px;
 }
 
-#logo-img {
-    
-}
-
 #logo-title {
     display: block;
     margin-left: 0.5rem; 
@@ -97,25 +93,21 @@ body {
 }
 
 /* Profile */
-#profile-link {
+#profile {
     display: flex;
     margin-left: auto;
     align-items: center;
     justify-content: center;
     width: 200px;
     text-decoration: none;
-    color: inherit;
     background-color: rgb(131, 173, 187);
+    color: white;
+    cursor: pointer;
 
     transition: background-color 1s ease 0s;
 }
 
-#profile {
-    display: flex;
-    color: white;
-}
-
-#profile-link:hover {
+#profile:hover {
     background-color: coral;
 }
 
@@ -135,6 +127,8 @@ body {
     align-items: center;
     justify-content: center;
     width: 100px;
+    color: white;
+    cursor: pointer;
 
     transition: background-color 1s ease 0s,
         width 1s ease 0s;
@@ -173,7 +167,7 @@ body {
         display: none;
     }
 
-    #profile-link {
+    #profile {
         display: none; 
     }
 
@@ -220,14 +214,13 @@ body {
         justify-content: center;
         width: 100%;
         height: 50px;
+        cursor: pointer;
 
-        transition: background-color 1s ease 0s,
-            width 1s ease 0s;
+        transition: background-color 1s ease 0s
     }
 
     #hamburger-menu-aside li:hover {
         background-color: coral;
-        width: 175px;
     }
 
     #hamburger-menu-aside a {
@@ -247,23 +240,65 @@ section main .main-container {
 }
 
 /* Find match */
-#find-match {
+#in-queue {
+    flex-direction: column;
+    gap: 1em;
+}
+
+#find-match-button {
     width: 100px;
     height: 100px;
     background-color: white;
-    transition: width 1s ease 0s,  height 1s ease 0s;
+    cursor: pointer;
 
     animation: pulse 1.5s infinite ease-in-out;
     transition: width 1s ease 0s,  height 1s ease 0s;
 }
 
-#find-match:hover {
-    animation: pulse-hover 0.75s infinite ease-in-out;
+#find-match-button:hover {
     width: 125px;
     height: 125px;
-    cursor: pointer;
+
+    animation: pulse-hover 0.75s infinite ease-in-out;
 }
 
+#in-queue-button {
+    width: 100px;
+    height: 100px;
+    background-color: white;
+    cursor: pointer;
+
+    animation: stretch-wait 1.5s infinite linear;
+}
+
+#in-queue-share-msg {
+    display: none;
+    font-size: 12px;
+    color: red;
+}
+
+@keyframes stretch-wait {
+    0% {
+        width: 100px;
+        height: 100px;
+    }
+    25% {
+        width: 110px;
+        height: 95px;
+    }
+    50% {
+        width: 120px;
+        height: 100px;
+    }
+    75% {
+        width: 110px;
+        height: 105px;
+    }
+    100% {
+        width: 100px;
+        height: 100px;
+    }
+}
 
 @keyframes pulse {
     0% {
@@ -366,4 +401,15 @@ section main .main-container {
     display: block;
     width: 2px;
     height: 100%;
+}
+
+/* About */
+#about {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5em;
+}
+
+#about p {
+    margin: 0.2em 0;
 }

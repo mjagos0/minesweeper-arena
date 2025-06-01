@@ -2,10 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	"log"
-	"sync"
+	"fmt"
+	"math/rand"
 
 	"github.com/gorilla/websocket"
+)
+
+const (
+	PlayerOne = 0
+	PlayerTwo = 1
+	NoPlayer  = 2
 )
 
 type Player struct {
@@ -14,32 +20,78 @@ type Player struct {
 }
 
 type MultiplayerGame struct {
+	board   *Board
 	games   [2]*Game
 	players [2]*Player
-	mu      sync.Mutex
+	startX  int
+	startY  int
+	winner  int
+}
+
+type StartMessage struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+	Mines  int `json:"mines"`
+	StartX int `json:"startX"`
+	StartY int `json:"startY"`
+}
+
+type ClientMove struct {
+	X    int  `json:"x"`
+	Y    int  `json:"y"`
+	Flag bool `json:"flag"`
+}
+
+type MoveResponse struct {
+	CellUpdates []CellUpdate `json:"cellUpdates"`
+	YourMove    bool         `json:"yourMove"`
+	Win         bool         `json:"win"`
+	Lose        bool         `json:"lose"`
 }
 
 func NewMultiplayerGame(p1 *Player, p2 *Player) *MultiplayerGame {
 	board := NewBoard(9, 9, 10)
+	board.Print()
+	startY, startX := FindRandomSafeStartField(board)
+
 	return &MultiplayerGame{
+		board: board,
 		games: [2]*Game{
 			NewGame(board),
 			NewGame(board),
 		},
 		players: [2]*Player{p1, p2},
+		startX:  startX,
+		startY:  startY,
+		winner:  NoPlayer,
 	}
 }
 
-func (mg *MultiplayerGame) Start() {
-	startMessage := struct {
-		Type   string `json:"type"`
-		Width  int    `json:"width"`
-		Height int    `json:"height"`
-	}{
-		Type:   "start",
-		Width:  mg.games[0].board.width,
-		Height: mg.games[0].board.height,
+func FindRandomSafeStartField(b *Board) (int, int) {
+	nonMinePositions := make([][2]int, 0)
+	for y := 0; y < b.Height; y++ {
+		for x := 0; x < b.Width; x++ {
+			if b.At(x, y) != MINE {
+				nonMinePositions = append(nonMinePositions, [2]int{x, y})
+			}
+		}
 	}
+	if len(nonMinePositions) == 0 {
+		panic("No non-mine fields available")
+	}
+	start := nonMinePositions[rand.Intn(len(nonMinePositions))]
+	return start[0], start[1]
+}
+
+func (mg *MultiplayerGame) Start() {
+	startMessage := StartMessage{
+		Width:  mg.board.Width,
+		Height: mg.board.Height,
+		Mines:  mg.board.NumMines,
+		StartX: mg.startX,
+		StartY: mg.startY,
+	}
+
 	msg, _ := json.Marshal(startMessage)
 	mg.players[0].send <- msg
 	mg.players[1].send <- msg
@@ -54,60 +106,59 @@ func (mg *MultiplayerGame) listen(playerIndex int) {
 	defer player.conn.Close()
 
 	for {
-		var move struct {
-			X int `json:"x"`
-			Y int `json:"y"`
-		}
-		err := player.conn.ReadJSON(&move)
+		cmove := ClientMove{}
+		err := player.conn.ReadJSON(&cmove)
 		if err != nil {
-			log.Printf("Error reading from player %d: %v\n", playerIndex, err)
+			fmt.Printf("Error reading from player %d: %v\n", playerIndex, err)
 			break
+		} else {
+			fmt.Printf("Player %d sent move: %+v\n", playerIndex, cmove)
 		}
-		log.Printf("Player %d sent move: %+v\n", playerIndex, move)
 
-		mg.mu.Lock()
-		result := mg.games[playerIndex].Reveal(move.X, move.Y)
-		log.Printf("Reveal result for player %d: %+v\n", playerIndex, result)
+		cellUpdates := mg.games[playerIndex].processMove(cmove.X, cmove.Y, cmove.Flag)
+		fmt.Printf("Reveal result for player %d: %+v\n", playerIndex, cellUpdates)
+		maskedCellUpdates := make([]CellUpdate, len(cellUpdates))
+		for i, cell := range cellUpdates {
+			var value uint8 = 0
+			if cell.Value == WIPE {
+				value = WIPE
+			}
 
-		// Actual result for initiating player
-		response := struct {
-			RevealResult
-			YourMove bool `json:"yourMove"`
-		}{
-			RevealResult: result,
-			YourMove:     true,
-		}
-		actualBytes, _ := json.Marshal(response)
-
-		// Zeroed result for the opponent
-		masked := make([]RevealedCell, len(result.Positions))
-		for i, cell := range result.Positions {
-			masked[i] = RevealedCell{
+			maskedCellUpdates[i] = CellUpdate{
 				X:     cell.X,
 				Y:     cell.Y,
-				Value: 0, // hide real value
+				Value: value,
 			}
 		}
-		opponentResponse := struct {
-			RevealResult
-			YourMove bool `json:"yourMove"`
-		}{
-			RevealResult: RevealResult{
-				Positions: masked,
-				HitMine:   result.HitMine,
-				Won:       result.Won,
-			},
-			YourMove: false,
+
+		if mg.games[playerIndex].finished && mg.games[playerIndex].won {
+			mg.winner = playerIndex
+		} else if mg.games[1-playerIndex].finished && mg.games[playerIndex].revealed > mg.games[1-playerIndex].revealed {
+			mg.winner = playerIndex
+		} else if mg.games[playerIndex].finished && mg.games[1-playerIndex].finished {
+			if mg.games[playerIndex].revealed < mg.games[1-playerIndex].revealed {
+				mg.winner = 1 - playerIndex
+			} else {
+				mg.winner = playerIndex
+			}
 		}
-		maskedBytes, _ := json.Marshal(opponentResponse)
-		mg.mu.Unlock()
 
-		// Send to both players
-		log.Printf("Sending actual result to player %d", playerIndex)
-		mg.players[playerIndex].send <- actualBytes
+		respPlayer := MoveResponse{
+			CellUpdates: cellUpdates,
+			YourMove:    true,
+			Win:         playerIndex == mg.winner,
+			Lose:        1-playerIndex == mg.winner,
+		}
+		respOpponent := MoveResponse{
+			CellUpdates: maskedCellUpdates,
+			YourMove:    false,
+			Win:         1-playerIndex == mg.winner,
+			Lose:        playerIndex == mg.winner,
+		}
 
-		otherIndex := 1 - playerIndex
-		log.Printf("Sending masked result to player %d", otherIndex)
-		mg.players[otherIndex].send <- maskedBytes
+		playerResp, _ := json.Marshal(respPlayer)
+		opponentResp, _ := json.Marshal(respOpponent)
+		mg.players[playerIndex].send <- playerResp
+		mg.players[1-playerIndex].send <- opponentResp
 	}
 }

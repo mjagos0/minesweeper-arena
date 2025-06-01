@@ -4,63 +4,84 @@ import (
 	"fmt"
 )
 
+const (
+	UNREVEALED = 0
+	REVEALED   = 1
+	FLAGGED    = 2
+)
+
 type Game struct {
 	board    *Board
-	revealed []bool
-	lost     bool
+	state    []int
+	revealed int
+	finished bool
 	won      bool
 }
 
-type RevealResult struct {
-	Positions []RevealedCell `json:"positions"`
-	HitMine   bool           `json:"hitMine"`
-	Won       bool           `json:"won"`
-}
-
-type RevealedCell struct {
+type CellUpdate struct {
 	X     int   `json:"x"`
 	Y     int   `json:"y"`
 	Value uint8 `json:"value"`
 }
 
+func (g *Game) IsRevealed(x, y int) bool {
+	return g.state[g.board.getIndex(x, y)] == REVEALED
+}
+
+func (g *Game) IsFlagged(x, y int) bool {
+	return g.state[g.board.getIndex(x, y)] == FLAGGED
+}
+
+func (g *Game) UpdateState(x, y, state int) {
+	g.state[g.board.getIndex(x, y)] = state
+}
+
 func NewGame(board *Board) *Game {
 	return &Game{
 		board:    board,
-		revealed: make([]bool, board.width*board.height),
-		lost:     false,
+		state:    make([]int, board.Width*board.Height),
+		revealed: 0,
+		finished: false,
 		won:      false,
 	}
 }
 
-func (g *Game) Reveal(x, y int) RevealResult {
-	if g.lost || g.won || !g.board.inBounds(x, y) {
-		return RevealResult{}
+func (g *Game) processFlag(x, y int, cellUpdates *[]CellUpdate) {
+	if g.IsRevealed(x, y) {
+		return
 	}
 
-	index := y*g.board.width + x
-	if g.revealed[index] {
-		return RevealResult{}
+	if g.IsFlagged(x, y) {
+		g.UpdateState(x, y, UNREVEALED)
+		*cellUpdates = append(*cellUpdates, CellUpdate{X: x, Y: y, Value: WIPE})
+	} else {
+		g.UpdateState(x, y, FLAGGED)
+		*cellUpdates = append(*cellUpdates, CellUpdate{X: x, Y: y, Value: FLAG})
 	}
+}
 
-	positions := make([]RevealedCell, 0)
+func (g *Game) processReveal(x, y int, cellUpdates *[]CellUpdate) {
 	queue := [][2]int{{x, y}}
 	visited := make(map[[2]int]bool)
+	visited[[2]int{x, y}] = true
 
 	for len(queue) > 0 {
 		nx, ny := queue[0][0], queue[0][1]
 		queue = queue[1:]
-		nIdx := ny*g.board.width + nx
 
-		if !g.board.inBounds(nx, ny) || g.revealed[nIdx] {
+		if !g.board.inBounds(nx, ny) || g.IsRevealed(nx, ny) {
 			continue
 		}
-		g.revealed[nIdx] = true
+		g.UpdateState(nx, ny, REVEALED)
 		val := g.board.At(nx, ny)
-		positions = append(positions, RevealedCell{X: nx, Y: ny, Value: val})
+		*cellUpdates = append(*cellUpdates, CellUpdate{X: nx, Y: ny, Value: val})
 
 		if val == MINE {
-			g.lost = true
-			return RevealResult{Positions: positions, HitMine: true, Won: false}
+			g.finished = true
+			g.won = false
+			return
+		} else {
+			g.revealed++
 		}
 
 		if val == 0 {
@@ -69,8 +90,7 @@ func (g *Game) Reveal(x, y int) RevealResult {
 			for d := 0; d < 8; d++ {
 				nxx, nyy := nx+dx[d], ny+dy[d]
 				if g.board.inBounds(nxx, nyy) {
-					nIndex := nyy*g.board.width + nxx
-					if !g.revealed[nIndex] && !visited[[2]int{nxx, nyy}] {
+					if !g.IsRevealed(nxx, nyy) && !visited[[2]int{nxx, nyy}] {
 						queue = append(queue, [2]int{nxx, nyy})
 						visited[[2]int{nxx, nyy}] = true
 					}
@@ -79,25 +99,29 @@ func (g *Game) Reveal(x, y int) RevealResult {
 		}
 	}
 
-	total := g.board.width * g.board.height
-	revealedCount := 0
-	for _, r := range g.revealed {
-		if r {
-			revealedCount++
-		}
-	}
-	if revealedCount == total-g.board.numMines {
+	if g.revealed == len(g.board.Fields)-g.board.NumMines {
+		g.finished = true
 		g.won = true
 	}
-
-	return RevealResult{Positions: positions, HitMine: false, Won: g.won}
 }
 
-func (g *Game) PrintVisible() {
-	for y := 0; y < g.board.height; y++ {
-		for x := 0; x < g.board.width; x++ {
-			idx := y*g.board.width + x
-			if g.revealed[idx] {
+func (g *Game) processMove(x, y int, flag bool) []CellUpdate {
+	cellUpdates := make([]CellUpdate, 0)
+	if g.finished || !g.board.inBounds(x, y) || g.IsRevealed(x, y) {
+		return cellUpdates
+	} else if flag {
+		g.processFlag(x, y, &cellUpdates)
+	} else {
+		g.processReveal(x, y, &cellUpdates)
+	}
+
+	return cellUpdates
+}
+
+func (g *Game) Print() {
+	for y := 0; y < g.board.Height; y++ {
+		for x := 0; x < g.board.Width; x++ {
+			if g.IsRevealed(x, y) {
 				val := g.board.At(x, y)
 				if val == MINE {
 					fmt.Print("* ")

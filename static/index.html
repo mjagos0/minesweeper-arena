@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="./stylesheet.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheet.css">
     <title>Minesweeper Arena</title>
 
 </head>
@@ -35,9 +35,10 @@
 
             <nav id="menu" style="background-color: rgb(65, 154, 189)">
                 <ul>
-                    <a href="#"><li>Play</li></a>
-                    <a href="#"><li>Ladder</li></a>
-                    <a href="#"><li>About</li></a>
+                    <li class="menu-item" data-action="play">Play</li>
+                    <li class="menu-item" data-action="ladder">Ladder</li>
+                    <!-- <li class="menu-item" data-action="rules">Rules</li> -->
+                    <li class="menu-item" data-action="about">About</li>
                 </ul>
             </nav>
             
@@ -45,11 +46,9 @@
                 <span>☰</span>
             </div>
 
-            <a id="profile-link" href="/">
-                <div id="profile">
-                    <span>Register</span>
-                </div>
-            </a>
+            <div id="profile" class="menu-item" data-action="register">
+                <span id="username">Anonymous</span>
+            </div>
         </header>
         
         <section>
@@ -60,15 +59,17 @@
             <aside id="side-content" style="background-color: lightseagreen">
                 <section id="hamburger-menu-aside" style="background-color: lightgoldenrodyellow">
                     <ul>
-                        <a href="#"><li>Register</li></a>
-                        <a href="#"><li>Play</li></a>
-                        <a href="#"><li>Ladder</li></a>
-                        <a href="#"><li>About</li></a>
+                        <li class="menu-item" data-action="register">Register</li>
+                        <li class="menu-item" data-action="play">Play</li>
+                        <li class="menu-item" data-action="ladder">Ladder</li>
+                        <!-- <li class="menu-item" data-action="rules">Rules</li> -->
+                        <li class="menu-item" data-action="about">About</li>
                     </ul>
                 </section>
 
                 <section id="highest-rated" style="background-color: lightcyan">
-                    <ul>
+                    Recent results unavailable
+                    <!-- <ul>
                         <li>Player 1 Elo 5000</li>
                         <li>Player 1 Elo 4900</li>
                         <li>Player 1 Elo 5000</li>
@@ -94,13 +95,13 @@
                         <li>Match 2</li>
                         <li>Match 1</li>
                         <li>Match 2</li>
-                    </ul>
+                    </ul> -->
                 </section>
             </aside>
 
         </section>
     </div>
 
-    <script type="module" src="./main.js"></script>
+    <script type="module" src="/main.js"></script>
 </body>
 </html>
