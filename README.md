@@ -31,24 +31,29 @@ All interactions are routed through the server. The client sends requests to rev
 
 The client sees its own board on the left with full visibility. The opponent's board is shown on the right but only displays interacted tiles, not their values. This allows tracking opponent progress without revealing information about the board layout.
 
-### Client interaction & Gameplay
-Clients are presented with a single button in middle of the screen:
-![alt text](_images/image-6.png)
+### Client Interaction & Gameplay
 
-By pressing it, socket is created, and they join a queue:
-![alt text](_images/image-1.png)
+Clients are presented with a single button in the center of the screen:  
+<img src="docs/image-6.png" width="300"/>
 
-When paired with another client, they are presented with  responsive double-board layout. The cross marks a starting position for the player. The player is not forced to start on cross, but risks revealing a bomb on his first turn.
-![alt text](_images/image-8.png)
+By pressing it, a socket is created and they join a queue:  
+<img src="docs/image-1.png" width="300"/>
 
-When client reveals a mine, the board is revealed to him and he waits until the other client finishes.
-![alt text](_images/image-3.png)
+When paired with another client, they are shown a responsive double-board layout. The player's board is always on the left. The cross field marks the starting position. The player is not required to start on the cross but risks revealing a bomb on their first turn.  
+<img src="docs/image-9.png" width="300"/>
 
-Solving the full board results in immediate victory:
-![alt text](_images/image-4.png)
+Clients reveal fields on their own board while observing their opponent's moves.  
+<img src="docs/image-13.png" width="300"/>
 
-and loss for the opponent:
-![alt text](_images/image-5.png)
+If a client reveals a mine, their board is fully revealed and they must wait for the other client to finish.  
+<img src="docs/image-12.png" width="250"/>
+
+Solving the full board results in an immediate victory:  
+<img src="docs/image-4.png" width="400"/>
+
+And a loss for the opponent:  
+<img src="docs/image-5.png" width="400"/>
+
 
 
 #### Game Termination Rules
