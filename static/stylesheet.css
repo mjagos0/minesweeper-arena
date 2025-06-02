@@ -304,6 +304,10 @@ body {
         transform: scale(1);
         background-color: white;
     }
+    79% {
+        transform: scale(1);
+        background-color: white;
+    }
     80% {
         transform: scale(1);
         background-color: rgb(255, 240, 235);
@@ -329,7 +333,7 @@ body {
 @keyframes pulse-hover {
     0% {
         transform: scale(1);
-        background-color: white;
+        background-color: rgb(255, 240, 235);
     }
     80% {
         transform: scale(1);
