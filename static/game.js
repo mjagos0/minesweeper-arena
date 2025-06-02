@@ -30,6 +30,7 @@ export class Game {
         this.height = height;
         this.startX = startX;
         this.startY = startY;
+        this.gameConcluded = false;
 
         this.renderMinesweeperBoard(this.playerBoard, true);
         this.renderMinesweeperBoard(this.opponentBoard, false);
@@ -85,26 +86,29 @@ export class Game {
     }
 
     processEvent(data) {
-        for (const pos of data.cellUpdates) {
-            if (data.yourMove) {
-                console.log("processing my move");
-                this.revealCellPlayer(pos.y, pos.x, pos.value);
-            } else {
-                this.revealCellOpponent(pos.y, pos.x, pos.value);
-                console.log("processing opponents move");
+        if (!this.gameConcluded && (data.win || data.lose)) {
+            const msgElem = document.getElementById('lose-wait-msg');
+            msgElem.style.display = 'none';
+            this.gameConcluded = true;
+
+            if (data.win) {
+                this.gameWinSound.play();
+                const msgElemWin = document.getElementById('win-conclude-msg');
+                msgElemWin.style.display = 'block';
+                
+            } else if (data.lose) {
+                this.gameLoseSound.play();
+                const msgElemLose = document.getElementById('lose-conclude-msg');
+                msgElemLose.style.display = 'block';
             }
         }
 
-        if (data.win) {
-            this.gameWinSound.play();
-            alert("You won!");
-        } else if (data.lose) {
-            this.gameLoseSound.play();
-            alert("You lost!");
-        }
-
-        if (data.hitMine && data.yourMove) {
-            alert("You hit a mine!");
+        for (const pos of data.cellUpdates) {
+            if (data.yourMove) {
+                this.revealCellPlayer(pos.y, pos.x, pos.value);
+            } else {
+                this.revealCellOpponent(pos.y, pos.x, pos.value);
+            }
         }
     }
 
@@ -119,6 +123,15 @@ export class Game {
     revealCellPlayer(row, col, value) {
         const cell = this.getCellPlayer(row, col);
         cell.src = CELLS[value];
+
+        if (value == MINE) {
+            if (!this.gameConcluded) {
+                this.queueTimeout = setTimeout(() => {
+                const msgElem = document.getElementById('lose-wait-msg');
+                msgElem.style.display = 'block';
+                }, 2000);
+            }
+        }
     }
 
     revealCellOpponent(row, col, value) {

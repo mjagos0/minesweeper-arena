@@ -10,28 +10,31 @@ const CONTENT = {
 }
 
 let createGameHTML = `
-    <div id="create-game" class="main-container" style="background-color: lightslategray">
+    <div id="create-game" class="main-container" style="background-color: #f9f9f9">
         <button id="find-match-button">Find Match!</button>
     </div>
 `
 
 let inQueueHTML = `
-    <div id="in-queue" class="main-container" style="background-color: lightsteelblue">
+    <div id="in-queue" class="main-container" style="background-color: #f9f9f9">
         <button id="in-queue-button">Waiting for opponents..</button>
         <div id="in-queue-share-msg">Looks like nobody is playing at the moment. Send this link to a friend!</p>
     </div>
 `;
 
 let inGameHTML = `
-    <div id="in-game" class="main-container" style="background-color: lightyellow">
-        <div id="player-container" style="background-color: #ebf0b1">
-            <div id="player-board" style="background-color: #c3cad6"></div>
+    <div id="in-game" class="main-container" style="background-color: #f9f9f9">
+        <div id="player-container" style="background-color: #f9f9f9">
+            <div id="player-board" style="background-color: #f9f9f9"></div>
+            <div id="lose-wait-msg">You stepped on a mine. Wait for your opponent to finish.</div>
+            <div id="lose-conclude-msg">You lose!</div>
+            <div id="win-conclude-msg">You win!</div>
         </div>
 
         <div id="board-separator" style="background-color: black"></div>
 
-        <div id="opponent-container" style="background-color: #cacf91">
-            <div id="opponents-board" style="background-color: #d0ddf2"></div>
+        <div id="opponent-container" style="background-color: #f9f9f9">
+            <div id="opponents-board" style="background-color: #f9f9f9"></div>
         </div>
 
         </div>
@@ -39,23 +42,22 @@ let inGameHTML = `
 `;
 
 let ladderHTML = `
-    <div id="ladder" class="main-container" style="background-color: lightyellow">
+    <div id="ladder" class="main-container" style="background-color: #f9f9f9">
         Ladder unavailable
     </div>
 `
 
 let aboutHTML = `
-    <div id="about" class="main-container" style="background-color: lightyellow">
+    <div id="about" class="main-container" style="background-color: #f9f9f9">
         <p>Created for Czech Technical University,</p>
         <p>Faculty of Electrical Engineering,</p>
-        <p>Vývoj klientských aplikací v Javascriptu</p>
-        <p>(B0B39KAJ)</p>
+        <p>Vývoj klientských aplikací v Javascriptu (B0B39KAJ),</p>
         <p>2025, Marek Jagoš</p>
     </div>
 `
 
 let registerHTML = `
-    <div id="register" class="main-container" style="background-color: lightyellow">
+    <div id="register" class="main-container" style="background-color: #f9f9f9">
         Registration unavailable
     </div>
 `
@@ -65,6 +67,7 @@ class main {
         this.mainElem = document.querySelector('main');
         this.queueTimeout = null;
         this.gameStartSound = new Audio('/sounds/game-start.mp3');
+        this.user = "Anonymous";
     }
 
     render(content_type) {
@@ -164,27 +167,19 @@ class main {
     }
 }
 
+// Set default content
 let content = new main();
 content.render(CONTENT.CREATE_GAME);
 
+// Add listeners to buttons
 const hamburgerBtn = document.getElementById('hamburger-menu');
-const aside = document.querySelector('.page section aside');
+const aside = document.querySelector('.page .main-content aside');
 
 hamburgerBtn.addEventListener('click', () => {
     const isHidden = getComputedStyle(aside).display === 'none';
     aside.style.display = isHidden ? 'flex' : 'none';
 });
 
-window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
-        aside.style.display = 'flex';
-    } else {
-        aside.style.display = 'none';
-    }
-})
-
-let loggedIn = false;
-let user = "Unknown";
 document.querySelectorAll('.menu-item').forEach(item => {
     item.addEventListener('click', (e) => {
         const action = item.getAttribute('data-action');
@@ -200,12 +195,17 @@ document.querySelectorAll('.menu-item').forEach(item => {
                 content.render(CONTENT.ABOUT);
                 break;
             case 'register':
-                if (!loggedIn) {
-                    content.render(CONTENT.REGISTER);
-                }
+                content.render(CONTENT.REGISTER);
                 break;
             default:
                 console.log('Unknown action');
         }
     });
 });
+
+// Hide aside on resize
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        aside.style.display = 'none';
+    }
+})

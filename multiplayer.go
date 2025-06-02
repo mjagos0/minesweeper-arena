@@ -68,18 +68,26 @@ func NewMultiplayerGame(p1 *Player, p2 *Player) *MultiplayerGame {
 }
 
 func FindRandomSafeStartField(b *Board) (int, int) {
-	nonMinePositions := make([][2]int, 0)
+	candidates := make([][2]int, 0)
 	for y := 0; y < b.Height; y++ {
 		for x := 0; x < b.Width; x++ {
-			if b.At(x, y) != MINE {
-				nonMinePositions = append(nonMinePositions, [2]int{x, y})
+			if b.At(x, y) == 0 {
+				candidates = append(candidates, [2]int{x, y})
 			}
 		}
 	}
-	if len(nonMinePositions) == 0 {
-		panic("No non-mine fields available")
+
+	if len(candidates) == 0 {
+		for y := 0; y < b.Height; y++ {
+			for x := 0; x < b.Width; x++ {
+				if b.At(x, y) != MINE {
+					candidates = append(candidates, [2]int{x, y})
+				}
+			}
+		}
 	}
-	start := nonMinePositions[rand.Intn(len(nonMinePositions))]
+
+	start := candidates[rand.Intn(len(candidates))]
 	return start[0], start[1]
 }
 
@@ -133,8 +141,8 @@ func (mg *MultiplayerGame) listen(playerIndex int) {
 
 		if mg.games[playerIndex].finished && mg.games[playerIndex].won {
 			mg.winner = playerIndex
-		} else if mg.games[1-playerIndex].finished && mg.games[playerIndex].revealed > mg.games[1-playerIndex].revealed {
-			mg.winner = playerIndex
+			// } else if mg.games[1-playerIndex].finished && mg.games[playerIndex].revealed > mg.games[1-playerIndex].revealed {
+			// 	mg.winner = playerIndex
 		} else if mg.games[playerIndex].finished && mg.games[1-playerIndex].finished {
 			if mg.games[playerIndex].revealed < mg.games[1-playerIndex].revealed {
 				mg.winner = 1 - playerIndex

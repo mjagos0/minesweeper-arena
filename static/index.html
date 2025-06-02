@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
 <body>
     <div class="page">
         <header style="background-color: lightblue">
-            <a id="logo-link" href="/">
+            <a id="logo-link" href="/" style="background-color: lightblue;">
                 <div id="logo">
                     <svg id="logo-img" viewBox="0 0 100 100">
                         <rect x="10" y="10" width="80" height="80" rx="10" ry="10" fill="#ddd" stroke="#888" stroke-width="2"/>
@@ -36,7 +36,7 @@
             <nav id="menu" style="background-color: rgb(65, 154, 189)">
                 <ul>
                     <li class="menu-item" data-action="play">Play</li>
-                    <li class="menu-item" data-action="ladder">Ladder</li>
+                    <!-- <li class="menu-item" data-action="ladder">Ladder</li> -->
                     <li class="menu-item" data-action="about">About</li>
                 </ul>
             </nav>
@@ -50,23 +50,23 @@
             </div>
         </header>
         
-        <section>
-            <main style="background-color: lightgreen">
+        <div class="main-content">
+            <main style="background-color: #e6f4f9">
                 <!-- Content handled by JS -->
             </main>
 
-            <aside id="side-content" style="background-color: lightseagreen">
-                <section id="hamburger-menu-aside" style="background-color: lightcyan">
+            <aside id="side-content" style="background-color: #e6f4f9">
+                <nav id="hamburger-menu-aside" style="background-color: rgb(65, 154, 189)">
                     <ul>
                         <li class="menu-item" data-action="register">Anonymous</li>
                         <li class="menu-item" data-action="play">Play</li>
-                        <li class="menu-item" data-action="ladder">Ladder</li>
+                        <!-- <li class="menu-item" data-action="ladder">Ladder</li> -->
                         <li class="menu-item" data-action="about">About</li>
                     </ul>
-                </section>
+                </nav>
 
-                <section id="highest-rated" style="background-color: lightcyan">
-                    Recent results unavailable
+                <!-- <section id="highest-rated" style="background-color: lightcyan"> -->
+                    <!-- Recent results unavailable -->
                     <!-- <ul>
                         <li>Player 1 Elo 5000</li>
                         <li>Player 1 Elo 4900</li>
@@ -80,7 +80,7 @@
                         <li>Player 1 Elo 4900</li>
                     </ul> -->
 
-                </section>
+                <!-- </section> -->
                 <!-- <section id="recent-matches" style="background-color: lightpink;">
                     <ul>
                         <li>Match 1</li>
@@ -97,7 +97,7 @@
                 </section> -->
             </aside>
 
-        </section>
+        </div>
     </div>
 
     <script type="module" src="./main.js"></script>
