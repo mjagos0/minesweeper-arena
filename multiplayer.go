@@ -15,8 +15,11 @@ const (
 )
 
 type Player struct {
-	conn *websocket.Conn
-	send chan []byte
+	conn     *websocket.Conn
+	send     chan []byte
+	closed   bool
+	game     *MultiplayerGame
+	playerId int
 }
 
 type MultiplayerGame struct {
@@ -103,75 +106,75 @@ func (mg *MultiplayerGame) Start() {
 	msg, _ := json.Marshal(startMessage)
 	mg.players[0].send <- msg
 	mg.players[1].send <- msg
+}
 
-	for i := 0; i < 2; i++ {
-		go mg.listen(i)
+func (mg *MultiplayerGame) ProcessPlayerMove(playerIndex int, cmove ClientMove) {
+	fmt.Printf("Player %d sent move: %+v\n", playerIndex, cmove)
+
+	cellUpdates := mg.games[playerIndex].processMove(cmove.X, cmove.Y, cmove.Flag)
+
+	maskedCellUpdates := make([]CellUpdate, len(cellUpdates))
+	for i, cell := range cellUpdates {
+		value := uint8(0)
+		if cell.Value == WIPE {
+			value = WIPE
+		}
+		maskedCellUpdates[i] = CellUpdate{
+			X:     cell.X,
+			Y:     cell.Y,
+			Value: value,
+		}
+	}
+
+	if mg.games[playerIndex].finished && mg.games[playerIndex].won {
+		mg.winner = playerIndex
+	} else if mg.games[playerIndex].finished && mg.games[1-playerIndex].finished {
+		if mg.games[playerIndex].revealed < mg.games[1-playerIndex].revealed {
+			mg.winner = 1 - playerIndex
+		} else {
+			mg.winner = playerIndex
+		}
+	}
+
+	respOpponent := MoveResponse{
+		CellUpdates: maskedCellUpdates,
+		YourMove:    false,
+		Win:         1-playerIndex == mg.winner,
+		Lose:        playerIndex == mg.winner,
+	}
+	mg.players[1-playerIndex].send <- toJson(respOpponent)
+
+	if mg.games[playerIndex].finished || mg.winner != NoPlayer {
+		mg.games[playerIndex].revealBoard(&cellUpdates)
+	}
+
+	respPlayer := MoveResponse{
+		CellUpdates: cellUpdates,
+		YourMove:    true,
+		Win:         playerIndex == mg.winner,
+		Lose:        1-playerIndex == mg.winner,
+	}
+	mg.players[playerIndex].send <- toJson(respPlayer)
+}
+
+func (mg *MultiplayerGame) HandleDisconnect(playerIndex int) {
+	fmt.Printf("Player %d disconnected\n", playerIndex)
+
+	if mg.winner == NoPlayer {
+		fmt.Printf("Game has no winner. Declearing the other player winner\n")
+		mg.winner = 1 - playerIndex
+
+		resp := MoveResponse{
+			CellUpdates: []CellUpdate{},
+			YourMove:    true,
+			Win:         true,
+			Lose:        false,
+		}
+		mg.players[1-playerIndex].send <- toJson(resp)
 	}
 }
 
-func (mg *MultiplayerGame) listen(playerIndex int) {
-	player := mg.players[playerIndex]
-	defer player.conn.Close()
-
-	for {
-		cmove := ClientMove{}
-		err := player.conn.ReadJSON(&cmove)
-		if err != nil {
-			fmt.Printf("Error reading from player %d: %v\n", playerIndex, err)
-			break
-		} else {
-			fmt.Printf("Player %d sent move: %+v\n", playerIndex, cmove)
-		}
-
-		cellUpdates := mg.games[playerIndex].processMove(cmove.X, cmove.Y, cmove.Flag)
-		fmt.Printf("Reveal result for player %d: %+v\n", playerIndex, cellUpdates)
-		maskedCellUpdates := make([]CellUpdate, len(cellUpdates))
-		for i, cell := range cellUpdates {
-			var value uint8 = 0
-			if cell.Value == WIPE {
-				value = WIPE
-			}
-
-			maskedCellUpdates[i] = CellUpdate{
-				X:     cell.X,
-				Y:     cell.Y,
-				Value: value,
-			}
-		}
-
-		if mg.games[playerIndex].finished && mg.games[playerIndex].won {
-			mg.winner = playerIndex
-			// } else if mg.games[1-playerIndex].finished && mg.games[playerIndex].revealed > mg.games[1-playerIndex].revealed {
-			// 	mg.winner = playerIndex
-		} else if mg.games[playerIndex].finished && mg.games[1-playerIndex].finished {
-			if mg.games[playerIndex].revealed < mg.games[1-playerIndex].revealed {
-				mg.winner = 1 - playerIndex
-			} else {
-				mg.winner = playerIndex
-			}
-		}
-
-		respOpponent := MoveResponse{
-			CellUpdates: maskedCellUpdates,
-			YourMove:    false,
-			Win:         1-playerIndex == mg.winner,
-			Lose:        playerIndex == mg.winner,
-		}
-		opponentResp, _ := json.Marshal(respOpponent)
-		mg.players[1-playerIndex].send <- opponentResp
-
-		if mg.games[playerIndex].finished || mg.winner != NoPlayer {
-			mg.games[playerIndex].revealBoard(&cellUpdates)
-		}
-
-		respPlayer := MoveResponse{
-			CellUpdates: cellUpdates,
-			YourMove:    true,
-			Win:         playerIndex == mg.winner,
-			Lose:        1-playerIndex == mg.winner,
-		}
-
-		playerResp, _ := json.Marshal(respPlayer)
-		mg.players[playerIndex].send <- playerResp
-	}
+func toJson(v any) []byte {
+	b, _ := json.Marshal(v)
+	return b
 }
