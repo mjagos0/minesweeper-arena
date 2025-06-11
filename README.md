@@ -2,6 +2,8 @@
 
 A browser-based, real-time multiplayer Minesweeper game built with Go (backend) and vanilla JavaScript (frontend). Players are matched randomly to compete on a shared board and race to finish first.
 
+The application currently runs at http://18.193.94.76/ and is in experiemental stage of development.
+
 ### Features
 
 - Real-time 1v1 multiplayer gameplay
